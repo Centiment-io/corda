@@ -84,7 +84,7 @@ class NodeMessagingClient(override val config: NodeConfiguration,
         private val nodeVersionProperty = SimpleString("node-version")
         private val nodeVendorProperty = SimpleString("node-vendor")
         private val amqDelay: Int = Integer.valueOf(System.getProperty("amq.delivery.delay.ms", "0"))
-        private val verifierResponseAddress = SimpleString("$VERIFICATION_RESPONSES_QUEUE_NAME_PREFIX.${random63BitValue()}")
+        private val verifierResponseAddress = "$VERIFICATION_RESPONSES_QUEUE_NAME_PREFIX.${random63BitValue()}"
     }
 
     private class InnerState {
@@ -186,8 +186,8 @@ class NodeMessagingClient(override val config: NodeConfiguration,
             }
 
             if (config.verifierType == VerifierType.OutOfProcess) {
-                session.createQueue(VerifierApi.VERIFICATION_REQUESTS_QUEUE_NAME, VerifierApi.VERIFICATION_REQUESTS_QUEUE_NAME)
-                session.createQueue(verifierResponseAddress, verifierResponseAddress)
+                createQueueIfAbsent(VerifierApi.VERIFICATION_REQUESTS_QUEUE_NAME)
+                createQueueIfAbsent(verifierResponseAddress)
                 verificationResponseConsumer = session.createConsumer(verifierResponseAddress)
                 messagingExecutor.scheduleAtFixedRate(::checkVerifierCount, 0, 10, TimeUnit.SECONDS)
             }
@@ -498,7 +498,7 @@ class NodeMessagingClient(override val config: NodeConfiguration,
                     messagingExecutor.fetchFrom {
                         state.locked {
                             val message = session!!.createMessage(false)
-                            val request = VerifierApi.VerificationRequest(nonce, transaction, verifierResponseAddress)
+                            val request = VerifierApi.VerificationRequest(nonce, transaction, SimpleString(verifierResponseAddress))
                             request.writeToClientMessage(message)
                             producer!!.send(VERIFICATION_REQUESTS_QUEUE_NAME, message)
                         }

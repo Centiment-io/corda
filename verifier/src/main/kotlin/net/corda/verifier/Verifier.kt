@@ -15,6 +15,7 @@ import net.corda.node.ConnectionDirection
 import net.corda.node.VerifierApi
 import net.corda.node.VerifierApi.VERIFICATION_REQUESTS_QUEUE_NAME
 import org.apache.activemq.artemis.api.core.client.ActiveMQClient
+import org.junit.rules.Verifier
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -29,14 +30,12 @@ data class VerifierConfiguration(
 }
 
 class Verifier {
-
     companion object {
         private val log = loggerFor<Verifier>()
 
-        fun loadConfiguration(baseDirectory: Path): VerifierConfiguration {
-            val customConfigPath = baseDirectory / "verifier.conf"
+        fun loadConfiguration(baseDirectory: Path, configPath: Path): VerifierConfiguration {
             val defaultConfig = ConfigFactory.parseResources("verifier-reference.conf", ConfigParseOptions.defaults().setAllowMissing(false))
-            val customConfig = ConfigFactory.parseFile(customConfigPath.toFile(), ConfigParseOptions.defaults().setAllowMissing(false))
+            val customConfig = ConfigFactory.parseFile(configPath.toFile(), ConfigParseOptions.defaults().setAllowMissing(false))
             val resolvedConfig = customConfig.withFallback(defaultConfig).resolve()
             return VerifierConfiguration(baseDirectory, resolvedConfig)
         }
@@ -45,7 +44,7 @@ class Verifier {
         fun main(args: Array<String>) {
             require(args.isNotEmpty()) { "Usage: <binary> BASE_DIR_CONTAINING_VERIFIER_CONF" }
             val baseDirectory = Paths.get(args[0])
-            val verifierConfig = loadConfiguration(baseDirectory)
+            val verifierConfig = loadConfiguration(baseDirectory, baseDirectory / "verifier.conf")
             val locator = ActiveMQClient.createServerLocatorWithHA(
                     tcpTransport(ConnectionDirection.Outbound(), verifierConfig.nodeHostAndPort, verifierConfig)
             )

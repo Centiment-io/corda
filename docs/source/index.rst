@@ -133,6 +133,7 @@ Documentation Contents:
    further-notes-on-kotlin
    publishing-corda
    azure-vm
+   out-of-process-verification
 
 .. toctree::
    :maxdepth: 2

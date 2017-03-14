@@ -235,10 +235,11 @@ data class VerifierDriverDSL(
         log.info("Starting verifier connecting to address $address")
         val id = verifierCount.andIncrement
         val verifierName = "verifier$id"
-        val baseDirectory = driverDSL.driverDirectory / "verifierName"
+        val baseDirectory = driverDSL.driverDirectory / verifierName
         val config = createConfiguration(baseDirectory, address)
-        writeConfig(baseDirectory, "verifier.conf", config)
-        Verifier.loadConfiguration(baseDirectory).configureDevKeyAndTrustStores(verifierName)
+        val configFilename = "verifier.conf"
+        writeConfig(baseDirectory, configFilename, config)
+        Verifier.loadConfiguration(baseDirectory, baseDirectory / configFilename).configureDevKeyAndTrustStores(verifierName)
 
         val className = Verifier::class.java.name
         val separator = System.getProperty("file.separator")

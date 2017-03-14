@@ -94,3 +94,22 @@ dependencies {
     // Integration test helpers
     integrationTestCompile "junit:junit:$junit_version"
 }
+
+jar {
+    // Create a fat jar by packing all deps into the output
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude("META-INF/*.DSA")
+    exclude("META-INF/*.RSA")
+    exclude("META-INF/*.SF")
+    manifest {
+        attributes 'Main-Class': 'net.corda.verifier.Verifier'
+    }
+    archiveName "corda-verifier.jar"
+}
+
+task integrationTest(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
