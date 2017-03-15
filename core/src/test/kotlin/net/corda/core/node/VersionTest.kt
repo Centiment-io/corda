@@ -28,4 +28,19 @@ class VersionTest {
             Version.parse("2.3-TEST")
         }.isInstanceOf(IllegalArgumentException::class.java)
     }
+
+    @Test
+    fun `version 0 compatibility`() {
+        assertThat(Version(0, 1, false).isCompatible(Version(0, 1, true))).isFalse()
+        assertThat(Version(0, 2, false).isCompatible(Version(0, 1, false))).isFalse()
+        assertThat(Version(0, 1, true).isCompatible(Version(0, 1, true))).isTrue()
+    }
+
+    @Test
+    fun `version non-0 compatibility`() {
+        assertThat(Version(1, 1, false).isCompatible(Version(1, 1, true))).isFalse()
+        assertThat(Version(1, 2, false).isCompatible(Version(1, 1, false))).isTrue()
+        assertThat(Version(1, 2, true).isCompatible(Version(1, 1, true))).isTrue()
+        assertThat(Version(1, 1, false).isCompatible(Version(2, 1, false))).isFalse()
+    }
 }

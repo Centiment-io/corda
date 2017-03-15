@@ -3,6 +3,7 @@ package net.corda.node.services.network
 import com.google.common.annotations.VisibleForTesting
 import kotlinx.support.jdk8.collections.compute
 import kotlinx.support.jdk8.collections.removeIf
+import kotlinx.support.jdk8.collections.forEach
 import net.corda.core.ThreadBox
 import net.corda.core.crypto.DigitalSignature
 import net.corda.core.crypto.Party
@@ -231,6 +232,10 @@ abstract class AbstractNetworkMapService(services: ServiceHubInternal) : Network
         }
 
         val node = registration.node
+
+        if (!services.myInfo.version.isCompatible(node.version)) {
+            return RegistrationResponse("${node.version} is incompatible with ${services.myInfo.version}")
+        }
 
         // Update the current value atomically, so that if multiple updates come
         // in on different threads, there is no risk of a race condition while checking

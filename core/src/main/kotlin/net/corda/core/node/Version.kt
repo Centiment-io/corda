@@ -22,6 +22,15 @@ data class Version(val major: Int, val minor: Int, val snapshot: Boolean) {
         }
     }
 
+    fun isCompatible(other: Version): Boolean {
+        if (this.snapshot != other.snapshot) return false
+        return if (this.major == 0 && other.major == 0) {
+            this.minor == other.minor
+        } else {
+            this.major == other.major
+        }
+    }
+
     override fun toString(): String = if (snapshot) "$major.$minor-SNAPSHOT" else "$major.$minor"
 }
 
